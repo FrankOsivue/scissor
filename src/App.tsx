@@ -1,8 +1,22 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+
 function App() {
   return (
-    <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-      <h1 className='text-4xl font-bold text-blue-600'>Scissor is running!</h1>
-    </div>
+    <Router>
+      <Routes>
+        {/* The Landing Page */}
+        <Route
+          path='/'
+          element={<Home />}
+        />
+
+        {/* We will build these out in the next phases */}
+        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+        {/* <Route path="/sign-in" element={<SignIn />} /> */}
+        {/* <Route path="/sign-up" element={<SignUp />} /> */}
+      </Routes>
+    </Router>
   )
 }
 
