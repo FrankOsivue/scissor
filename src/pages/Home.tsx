@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Type, QrCode as QrIcon, BarChart3, Clock } from 'lucide-react'
-import Header from '../components/layout/Header'
-import Footer from '../components/layout/Footer'
+
 import UrlInputForm from '../components/features/UrlInputForm'
 import ShortenedResult from '../components/features/ShortenedResult'
 import QrCodeGenerator from '../components/features/QrCodeGenerator'
@@ -28,9 +27,7 @@ export default function Home() {
   }
 
   return (
-    <div className='bg-gray-50 text-gray-900 font-sans antialiased min-h-screen flex flex-col'>
-      <Header />
-
+    <>
       <main className='flex-grow flex flex-col items-center px-4 md:px-8 py-12 max-w-6xl mx-auto w-full'>
         {/* Hero Section */}
         <div className='text-center mb-12 max-w-2xl pt-4'>
@@ -107,9 +104,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
+    </>
   )
 }
 
