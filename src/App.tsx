@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
+import Expired from './pages/Expired'
 
 function App() {
   return (
@@ -9,6 +10,11 @@ function App() {
         <Route
           path='/'
           element={<Home />}
+        />
+
+        <Route
+          path='/expired'
+          element={<Expired />}
         />
 
         {/* We will build these out in the next phases */}

@@ -35,7 +35,7 @@ export default function Home() {
         {/* Hero Section */}
         <div className='text-center mb-12 max-w-2xl pt-4'>
           <h1 className='font-display text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight'>
-            Shorten your links with surgical precision.
+            Shorten your links, Share anywhere.
           </h1>
           <p className='text-lg text-gray-500'>
             Transform long URLs into clean, branded assets. Track performance
