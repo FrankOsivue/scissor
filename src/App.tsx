@@ -1,14 +1,10 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom'
-import { SignedIn, SignedOut, SignIn, SignUp } from '@clerk/clerk-react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import Home from './pages/Home'
 import Expired from './pages/Expired'
+import DashboardLayout from './components/layout/DashboardLayout'
+import { SignIn, SignUp } from '@clerk/clerk-react'
 
 export default function App() {
   return (
@@ -36,7 +32,7 @@ export default function App() {
                   <SignIn
                     routing='path'
                     path='/sign-in'
-                    fallbackRedirectUrl='/dashboard'
+                    forceRedirectUrl='/dashboard'
                   />
                 </div>
               }
@@ -48,31 +44,24 @@ export default function App() {
                   <SignUp
                     routing='path'
                     path='/sign-up'
-                    fallbackRedirectUrl='/dashboard'
+                    forceRedirectUrl='/dashboard'
                   />
                 </div>
               }
             />
 
-            {/* Protected Dashboard Route */}
-            <Route
-              path='/dashboard'
-              element={
-                <>
-                  <SignedIn>
-                    <div className='p-8 text-center mt-12 text-2xl font-bold'>
-                      Welcome to your secure Dashboard!
-                    </div>
-                  </SignedIn>
-                  <SignedOut>
-                    <Navigate
-                      to='/sign-in'
-                      replace
-                    />
-                  </SignedOut>
-                </>
-              }
-            />
+            {/* Protected Dashboard Architecture */}
+            <Route element={<DashboardLayout />}>
+              <Route
+                path='/dashboard'
+                element={
+                  <div className='p-8 text-center mt-12 text-2xl font-bold'>
+                    Welcome to your secure Dashboard!
+                  </div>
+                }
+              />
+              {/* Future sub-routes like /dashboard/analytics or /dashboard/history go right here! */}
+            </Route>
           </Routes>
         </main>
         <Footer /> {/* Always on bottom */}
