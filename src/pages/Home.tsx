@@ -1,29 +1,57 @@
 import { useState } from 'react'
 import { Type, QrCode as QrIcon, BarChart3, Clock } from 'lucide-react'
+import { useMutation } from 'convex/react'
+import { api } from '../../convex/_generated/api' // Adjust path if necessary
 
 import UrlInputForm from '../components/features/UrlInputForm'
 import ShortenedResult from '../components/features/ShortenedResult'
 import QrCodeGenerator from '../components/features/QrCodeGenerator'
 
 export default function Home() {
-  // Home only cares about the final data returned from the form submission
+  // 1. Initialize the Convex Database Mutation
+  const createShortLink = useMutation(api.links.createShortLink)
+
+  // 2. UI State Management
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [activeLinkData, setActiveLinkData] = useState<{
     longUrl: string
     shortUrl: string
   } | null>(null)
 
-  // This will eventually connect to your Convex Database
-  const handleFormSubmit = (data: {
+  // 3. The Live Database Handler
+  const handleFormSubmit = async (data: {
     longUrl: string
     customSlug: string
     expiryDate: string
   }) => {
-    // MOCK DATA: Simulating a successful backend response to test the UI flow
-    const slug = data.customSlug || 'xyz123'
-    setActiveLinkData({
-      longUrl: data.longUrl,
-      shortUrl: `scissor.ly/${slug}`,
-    })
+    setIsLoading(true)
+    setErrorMessage('')
+    setActiveLinkData(null) // Clear previous results while loading
+
+    try {
+      // Fire the payload to the Convex cloud
+      const resultSlug = await createShortLink({
+        longUrl: data.longUrl,
+        customSlug: data.customSlug.trim() !== '' ? data.customSlug : undefined,
+      })
+
+      // Get the current website URL dynamically
+      const currentDomain = window.location.origin
+
+      // Update the UI with the real generated link
+      setActiveLinkData({
+        longUrl: data.longUrl,
+        shortUrl: `${currentDomain}/${resultSlug}`,
+      })
+    } catch (err: any) {
+      // Catch the "slug is already taken" error from our backend
+      setErrorMessage(
+        err.message || 'An error occurred while shortening the link.',
+      )
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -40,11 +68,18 @@ export default function Home() {
           </p>
         </div>
 
+        {/* Error Display (Renders just above the form if a custom slug is taken) */}
+        {errorMessage && (
+          <div className='w-full max-w-3xl mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-center font-medium animate-fade-in-up'>
+            {errorMessage}
+          </div>
+        )}
+
         {/* Core Form Component */}
         <div className='w-full max-w-3xl bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 transition-shadow hover:shadow-md duration-300 mb-12'>
           <UrlInputForm
             onSubmit={handleFormSubmit}
-            isLoading={false}
+            isLoading={isLoading}
             slugAvailable={null}
           />
         </div>
