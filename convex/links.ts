@@ -1,4 +1,5 @@
 import { mutation } from './_generated/server'
+import { query } from './_generated/server'
 import { v } from 'convex/values'
 import { nanoid } from 'nanoid'
 
@@ -89,5 +90,35 @@ export const getAndTrackClick = mutation({
 
     // 4. Return the original destination URL
     return link.longUrl
+  },
+})
+
+export const getUserLinks = query({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Verify the user is logged in via the Clerk-Convex bridge
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) {
+      return []
+    }
+
+    // 2. Find the user's internal Convex database ID using their Clerk ID
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_clerk_id', (q) => q.eq('clerkId', identity.subject))
+      .unique()
+
+    if (!user) {
+      return []
+    }
+
+    // 3. Fetch all links belonging to this specific user
+    const links = await ctx.db
+      .query('links')
+      .withIndex('by_userId', (q) => q.eq('userId', user._id))
+      .order('desc')
+      .collect()
+
+    return links
   },
 })
