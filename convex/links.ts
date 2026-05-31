@@ -57,3 +57,37 @@ export const createShortLink = mutation({
     return finalSlug
   },
 })
+
+export const getAndTrackClick = mutation({
+  args: {
+    shortCode: v.string(),
+    deviceType: v.string(), // We will pass whether they are on mobile or desktop
+  },
+  handler: async (ctx, args) => {
+    // 1. Find the link in the database
+    const link = await ctx.db
+      .query('links')
+      .withIndex('by_shortCode', (q) => q.eq('shortCode', args.shortCode))
+      .unique()
+
+    // If it doesn't exist, return null so the frontend can show a 404
+    if (!link) {
+      return null
+    }
+
+    // 2. Increment the total click counter on the link itself
+    await ctx.db.patch(link._id, {
+      clicks: link.clicks + 1,
+    })
+
+    // 3. Log the specific click event for the Analytics Dashboard
+    await ctx.db.insert('analytics', {
+      linkId: link._id,
+      timestamp: Date.now(),
+      deviceType: args.deviceType,
+    })
+
+    // 4. Return the original destination URL
+    return link.longUrl
+  },
+})

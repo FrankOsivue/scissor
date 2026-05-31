@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Expired from './pages/Expired'
 import DashboardLayout from './components/layout/DashboardLayout'
 import { SignIn, SignUp } from '@clerk/clerk-react'
+import Redirector from './pages/Redirector'
 
 export default function App() {
   return (
@@ -62,6 +63,10 @@ export default function App() {
               />
               {/* Future sub-routes like /dashboard/analytics or /dashboard/history go right here! */}
             </Route>
+            <Route
+              path='/:shortCode'
+              element={<Redirector />}
+            />
           </Routes>
         </main>
         <Footer /> {/* Always on bottom */}
