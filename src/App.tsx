@@ -6,6 +6,7 @@ import Expired from './pages/Expired'
 import DashboardLayout from './components/layout/DashboardLayout'
 import { SignIn, SignUp } from '@clerk/clerk-react'
 import Redirector from './pages/Redirector'
+import Dashboard from './pages/Dashboard'
 
 export default function App() {
   return (
@@ -55,13 +56,8 @@ export default function App() {
             <Route element={<DashboardLayout />}>
               <Route
                 path='/dashboard'
-                element={
-                  <div className='p-8 text-center mt-12 text-2xl font-bold'>
-                    Welcome to your secure Dashboard!
-                  </div>
-                }
+                element={<Dashboard />}
               />
-              {/* Future sub-routes like /dashboard/analytics or /dashboard/history go right here! */}
             </Route>
             <Route
               path='/:shortCode'
