@@ -7,21 +7,26 @@ import {
   QrCode as QrIcon,
   ExternalLink,
   BarChart2,
+  X,
 } from 'lucide-react'
 
-export default function Dashboard() {
-  // Fetch the data from your new Convex query
-  const links = useQuery(api.links.getUserLinks)
+import QrCodeGenerator from '../components/features/QrCodeGenerator'
 
-  // State to manage the "Copied!" checkmark animation
+export default function Dashboard() {
+  const links = useQuery(api.links.getUserLinks)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  // Helper function to copy the link to the user's clipboard
+  // New State: Tracks which link's QR code is currently being viewed
+  const [activeQrData, setActiveQrData] = useState<{
+    shortCode: string
+    fullUrl: string
+  } | null>(null)
+
   const handleCopy = (shortCode: string, id: string) => {
     const fullUrl = `${window.location.origin}/${shortCode}`
     navigator.clipboard.writeText(fullUrl)
     setCopiedId(id)
-    setTimeout(() => setCopiedId(null), 2000) // Reset after 2 seconds
+    setTimeout(() => setCopiedId(null), 2000)
   }
 
   // 1. Loading State
@@ -33,7 +38,7 @@ export default function Dashboard() {
     )
   }
 
-  // 2. Empty State (If they haven't created any links yet)
+  // 2. Empty State
   if (links.length === 0) {
     return (
       <div className='flex flex-col items-center justify-center p-12 mt-10 text-center animate-fade-in-up'>
@@ -72,7 +77,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className='bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden'>
+      <div className='bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative'>
         <div className='overflow-x-auto'>
           <table className='w-full text-left border-collapse'>
             <thead>
@@ -89,7 +94,6 @@ export default function Dashboard() {
                   key={link._id}
                   className='hover:bg-gray-50 transition-colors group'
                 >
-                  {/* Long URL Column */}
                   <td className='p-4 max-w-xs truncate text-gray-600 text-sm'>
                     <a
                       href={link.longUrl}
@@ -100,8 +104,6 @@ export default function Dashboard() {
                       {link.longUrl}
                     </a>
                   </td>
-
-                  {/* Short Link Column */}
                   <td className='p-4'>
                     <a
                       href={`/${link.shortCode}`}
@@ -113,17 +115,12 @@ export default function Dashboard() {
                       <ExternalLink className='w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity' />
                     </a>
                   </td>
-
-                  {/* Clicks Column */}
                   <td className='p-4 text-center'>
                     <span className='inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-800 text-xs font-medium'>
                       {link.clicks}
                     </span>
                   </td>
-
-                  {/* Actions Column */}
                   <td className='p-4 flex items-center justify-end gap-2'>
-                    {/* Copy Button */}
                     <button
                       onClick={() => handleCopy(link.shortCode, link._id)}
                       className='p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors'
@@ -135,9 +132,14 @@ export default function Dashboard() {
                         <Copy className='w-5 h-5' />
                       )}
                     </button>
-
-                    {/* QR Code Button */}
+                    {/* Updated QR Code Button */}
                     <button
+                      onClick={() =>
+                        setActiveQrData({
+                          shortCode: link.shortCode,
+                          fullUrl: `${window.location.origin}/${link.shortCode}`,
+                        })
+                      }
                       className='p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors'
                       title='Generate QR Code'
                     >
@@ -150,6 +152,28 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
+
+      {/* 4. The QR Code Modal Overlay */}
+      {activeQrData && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 animate-fade-in-up'>
+          <div className='bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden relative'>
+            <div className='flex items-center justify-between p-4 border-b border-gray-100'>
+              <h3 className='font-semibold text-gray-900'>
+                QR Code: /{activeQrData.shortCode}
+              </h3>
+              <button
+                onClick={() => setActiveQrData(null)}
+                className='p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors'
+              >
+                <X className='w-5 h-5' />
+              </button>
+            </div>
+            <div className='p-6'>
+              <QrCodeGenerator url={activeQrData.fullUrl} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
