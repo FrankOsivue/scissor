@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useQuery } from 'convex/react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
+
 import {
   Copy,
   CheckCircle2,
@@ -8,19 +9,24 @@ import {
   ExternalLink,
   BarChart2,
   X,
+  Trash2,
 } from 'lucide-react'
+import type { Id } from '../../convex/_generated/dataModel'
 
 import QrCodeGenerator from '../components/features/QrCodeGenerator'
 
 export default function Dashboard() {
   const links = useQuery(api.links.getUserLinks)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  // New State: Tracks which link's QR code is currently being viewed
+  // 1. Initialize the delete mutation
+  const deleteLink = useMutation(api.links.deleteLink)
+
+  const [copiedId, setCopiedId] = useState<string | null>(null)
   const [activeQrData, setActiveQrData] = useState<{
     shortCode: string
     fullUrl: string
   } | null>(null)
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const handleCopy = (shortCode: string, id: string) => {
     const fullUrl = `${window.location.origin}/${shortCode}`
@@ -29,7 +35,26 @@ export default function Dashboard() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  // 1. Loading State
+  // 2. The Delete Handler
+  const handleDelete = async (id: Id<'links'>) => {
+    // Prevent accidental clicks with a browser confirmation
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this link? This action cannot be undone and will erase all click analytics.',
+    )
+
+    if (confirmed) {
+      setIsDeleting(id)
+      try {
+        await deleteLink({ id })
+      } catch (error) {
+        console.error('Failed to delete link:', error)
+        alert('There was an error deleting your link.')
+      } finally {
+        setIsDeleting(null)
+      }
+    }
+  }
+
   if (links === undefined) {
     return (
       <div className='flex flex-grow items-center justify-center p-12'>
@@ -38,7 +63,6 @@ export default function Dashboard() {
     )
   }
 
-  // 2. Empty State
   if (links.length === 0) {
     return (
       <div className='flex flex-col items-center justify-center p-12 mt-10 text-center animate-fade-in-up'>
@@ -62,7 +86,6 @@ export default function Dashboard() {
     )
   }
 
-  // 3. The Data Table
   return (
     <div className='max-w-5xl mx-auto w-full p-6 md:p-8 animate-fade-in-up'>
       <div className='flex justify-between items-end mb-8'>
@@ -132,7 +155,7 @@ export default function Dashboard() {
                         <Copy className='w-5 h-5' />
                       )}
                     </button>
-                    {/* Updated QR Code Button */}
+
                     <button
                       onClick={() =>
                         setActiveQrData({
@@ -145,6 +168,16 @@ export default function Dashboard() {
                     >
                       <QrIcon className='w-5 h-5' />
                     </button>
+
+                    {/* 3. The New Delete Button */}
+                    <button
+                      onClick={() => handleDelete(link._id)}
+                      disabled={isDeleting === link._id}
+                      className='p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors disabled:opacity-50'
+                      title='Delete Link'
+                    >
+                      <Trash2 className='w-5 h-5' />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -153,7 +186,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 4. The QR Code Modal Overlay */}
       {activeQrData && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 animate-fade-in-up'>
           <div className='bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden relative'>

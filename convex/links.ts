@@ -122,3 +122,45 @@ export const getUserLinks = query({
     return links
   },
 })
+
+export const deleteLink = mutation({
+  args: {
+    id: v.id('links'), //target link by ID
+  },
+  handler: async (ctx, args) => {
+    // 1. Security Check: Who is logged in?
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) {
+      throw new Error('You must be logged in to delete a link.')
+    }
+
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_clerk_id', (q) => q.eq('clerkId', identity.subject))
+      .unique()
+
+    if (!user) throw new Error('User profile not found.')
+
+    // 2. Fetch the link the user is trying to delete
+    const link = await ctx.db.get(args.id)
+    if (!link) throw new Error('Link not found.')
+
+    // 3. Authorization Check: Does this link actually belong to this user?
+    if (link.userId !== user._id) {
+      throw new Error('Unauthorized: You do not own this link.')
+    }
+
+    // 4. Clean up the database: Delete all analytics associated with this link
+    const relatedAnalytics = await ctx.db
+      .query('analytics')
+      .withIndex('by_linkId', (q) => q.eq('linkId', args.id))
+      .collect()
+
+    for (const record of relatedAnalytics) {
+      await ctx.db.delete(record._id)
+    }
+
+    // 5. Finally, delete the link itself
+    await ctx.db.delete(args.id)
+  },
+})

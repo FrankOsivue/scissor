@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
@@ -8,11 +8,17 @@ export default function Redirector() {
   const getAndTrackClick = useMutation(api.links.getAndTrackClick)
   const [error, setError] = useState(false)
 
+  // 1. tracks already fired the mutation
+  const hasTracked = useRef(false)
+
   useEffect(() => {
     const processRedirect = async () => {
       if (!shortCode) return
 
-      // Basic device detection for analytics
+      // 2. If tracked this click in Strict Mode, stop immediately.
+      if (hasTracked.current) return
+      hasTracked.current = true // 3. Mark as tracked before the async call to prevent multiple calls in case of re-renders.
+
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
       const deviceType = isMobile ? 'Mobile' : 'Desktop'
 
@@ -23,13 +29,11 @@ export default function Redirector() {
         })
 
         if (longUrl) {
-          // Standardize the URL (ensure it has http/https) and redirect
           const destination = longUrl.startsWith('http')
             ? longUrl
             : `https://${longUrl}`
           window.location.replace(destination)
         } else {
-          // The link wasn't found in the database
           setError(true)
         }
       } catch (err) {
@@ -41,7 +45,6 @@ export default function Redirector() {
     processRedirect()
   }, [shortCode, getAndTrackClick])
 
-  // If the link is invalid or doesn't exist, show a clean error state
   if (error) {
     return (
       <div className='flex min-h-screen items-center justify-center bg-gray-50 text-center px-4'>
@@ -63,7 +66,6 @@ export default function Redirector() {
     )
   }
 
-  // The loading state while waiting for the database
   return (
     <div className='flex min-h-screen items-center justify-center bg-gray-50'>
       <div className='h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600' />
