@@ -7,6 +7,7 @@ import DashboardLayout from './components/layout/DashboardLayout'
 import { SignIn, SignUp } from '@clerk/clerk-react'
 import Redirector from './pages/Redirector'
 import Dashboard from './pages/Dashboard'
+import Analytics from './pages/Analytics'
 
 export default function App() {
   return (
@@ -57,6 +58,10 @@ export default function App() {
               <Route
                 path='/dashboard'
                 element={<Dashboard />}
+              />
+              <Route
+                path='/dashboard/analytics'
+                element={<Analytics />}
               />
             </Route>
             <Route

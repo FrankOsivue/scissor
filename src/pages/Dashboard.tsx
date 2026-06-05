@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
+import { Link } from 'react-router-dom'
 
 import {
   Copy,
@@ -17,8 +18,6 @@ import QrCodeGenerator from '../components/features/QrCodeGenerator'
 
 export default function Dashboard() {
   const links = useQuery(api.links.getUserLinks)
-
-  // 1. Initialize the delete mutation
   const deleteLink = useMutation(api.links.deleteLink)
 
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -35,9 +34,7 @@ export default function Dashboard() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  // 2. The Delete Handler
   const handleDelete = async (id: Id<'links'>) => {
-    // Prevent accidental clicks with a browser confirmation
     const confirmed = window.confirm(
       'Are you sure you want to delete this link? This action cannot be undone and will erase all click analytics.',
     )
@@ -65,23 +62,27 @@ export default function Dashboard() {
 
   if (links.length === 0) {
     return (
-      <div className='flex flex-col items-center justify-center p-12 mt-10 text-center animate-fade-in-up'>
-        <div className='bg-blue-50 p-4 rounded-full mb-4'>
-          <BarChart2 className='w-8 h-8 text-blue-600' />
+      <div className='flex justify-between items-end mb-8'>
+        <div>
+          <h1 className='text-3xl font-display font-bold text-gray-900 mb-2'>
+            Link Management
+          </h1>
+          <p className='text-gray-500'>View and manage your shortened URLs.</p>
         </div>
-        <h2 className='text-2xl font-display font-bold text-gray-900 mb-2'>
-          No links yet
-        </h2>
-        <p className='text-gray-500 mb-6'>
-          Create your first shortened link on the home page to see your
-          analytics here.
-        </p>
-        <a
-          href='/'
-          className='bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors'
-        >
-          Create a Link
-        </a>
+
+        <div className='flex items-center gap-4'>
+          <div className='bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold text-sm border border-blue-100'>
+            Total Links: {links.length}
+          </div>
+
+          <Link
+            to='/dashboard/analytics'
+            className='flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm'
+          >
+            <BarChart2 className='w-4 h-4' />
+            View Analytics
+          </Link>
+        </div>
       </div>
     )
   }
@@ -95,8 +96,18 @@ export default function Dashboard() {
           </h1>
           <p className='text-gray-500'>View and manage your shortened URLs.</p>
         </div>
-        <div className='bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold text-sm border border-blue-100'>
-          Total Links: {links.length}
+        <div className='flex items-center gap-4'>
+          <div className='bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold text-sm border border-blue-100'>
+            Total Links: {links.length}
+          </div>
+
+          <Link
+            to='/dashboard/analytics'
+            className='flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm'
+          >
+            <BarChart2 className='w-4 h-4' />
+            View Analytics
+          </Link>
         </div>
       </div>
 
@@ -169,7 +180,6 @@ export default function Dashboard() {
                       <QrIcon className='w-5 h-5' />
                     </button>
 
-                    {/* 3. The New Delete Button */}
                     <button
                       onClick={() => handleDelete(link._id)}
                       disabled={isDeleting === link._id}
