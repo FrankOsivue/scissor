@@ -18,7 +18,7 @@ import {
 export default function AnalyticsOverview() {
   const stats = useQuery(api.analytics.getDashboardStats)
 
-  // 1. Loading State
+  // Render Loading State
   if (stats === undefined) {
     return (
       <div className='w-full h-64 bg-white rounded-xl border border-gray-200 shadow-sm flex items-center justify-center mb-8'>
@@ -27,53 +27,52 @@ export default function AnalyticsOverview() {
     )
   }
 
-  // 2. Empty State (Hide the charts if there are no links at all)
+  // Render Empty State
   if (!stats || stats.totalLinks === 0) {
     return null
   }
 
   return (
-    <div className='mb-8 space-y-6 animate-fade-in-down'>
-      {/* Top Stat Cards */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <div className='bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4'>
-          <div className='p-4 bg-blue-50 text-blue-600 rounded-lg'>
-            <LinkIcon className='w-6 h-6' />
+    // Added w-full and min-w-0 to the root container to ensure it respects viewport boundaries
+    <div className='mb-8 space-y-4 md:space-y-6 animate-fade-in-down w-full min-w-0'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6'>
+        <div className='bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4 min-w-0'>
+          <div className='p-3 sm:p-4 bg-blue-50 text-blue-600 rounded-lg shrink-0'>
+            <LinkIcon className='w-5 h-5 sm:w-6 sm:h-6' />
           </div>
-          <div>
-            <p className='text-sm font-medium text-gray-500'>
+          <div className='min-w-0'>
+            <p className='text-xs sm:text-sm font-medium text-gray-500 truncate'>
               Total Active Links
             </p>
-            <p className='text-3xl font-display font-bold text-gray-900'>
+            <p className='text-2xl sm:text-3xl font-display font-bold text-gray-900 truncate'>
               {stats.totalLinks}
             </p>
           </div>
         </div>
 
-        <div className='bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4'>
-          <div className='p-4 bg-emerald-50 text-emerald-600 rounded-lg'>
-            <MousePointerClick className='w-6 h-6' />
+        <div className='bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4 min-w-0'>
+          <div className='p-3 sm:p-4 bg-emerald-50 text-emerald-600 rounded-lg shrink-0'>
+            <MousePointerClick className='w-5 h-5 sm:w-6 sm:h-6' />
           </div>
-          <div>
-            <p className='text-sm font-medium text-gray-500'>
+          <div className='min-w-0'>
+            <p className='text-xs sm:text-sm font-medium text-gray-500 truncate'>
               Total Lifetime Clicks
             </p>
-            <p className='text-3xl font-display font-bold text-gray-900'>
+            <p className='text-2xl sm:text-3xl font-display font-bold text-gray-900 truncate'>
               {stats.totalClicks}
             </p>
           </div>
         </div>
       </div>
 
-      {/* The Graphs */}
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-        {/* Click Timeline (Spans 2 columns on large screens) */}
-        <div className='bg-white p-6 rounded-xl border border-gray-200 shadow-sm lg:col-span-2 flex flex-col'>
-          <h3 className='text-lg font-display font-bold text-gray-900 mb-6 flex items-center gap-2'>
-            <BarChart3 className='w-5 h-5 text-gray-400' />
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6'>
+        <div className='bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm lg:col-span-2 flex flex-col min-w-0'>
+          <h3 className='text-base sm:text-lg font-display font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2'>
+            <BarChart3 className='w-4 h-4 sm:w-5 sm:h-5 text-gray-400' />
             Click Engagement Timeline
           </h3>
-          <div className='h-64 w-full flex-grow'>
+
+          <div className='h-[300px] w-full'>
             {stats.timelineStats.length > 0 ? (
               <ResponsiveContainer
                 width='100%'
@@ -91,6 +90,7 @@ export default function AnalyticsOverview() {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
+                    minTickGap={30}
                   />
                   <YAxis
                     stroke='#9CA3AF'
@@ -104,6 +104,7 @@ export default function AnalyticsOverview() {
                       borderRadius: '8px',
                       border: 'none',
                       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      fontSize: '14px',
                     }}
                   />
                   <Line
@@ -117,19 +118,19 @@ export default function AnalyticsOverview() {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className='h-full flex items-center justify-center text-gray-400'>
+              <div className='h-full flex items-center justify-center text-gray-400 text-sm'>
                 Not enough click data to generate timeline yet.
               </div>
             )}
           </div>
         </div>
 
-        {/* Device Distribution Pie Chart */}
-        <div className='bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col'>
-          <h3 className='text-lg font-display font-bold text-gray-900 mb-6'>
+        <div className='bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col min-w-0'>
+          <h3 className='text-base sm:text-lg font-display font-bold text-gray-900 mb-4 sm:mb-6'>
             Device Distribution
           </h3>
-          <div className='h-64 w-full flex-grow'>
+
+          <div className='h-[300px] w-full'>
             {stats.deviceStats.some((d) => d.value > 0) ? (
               <ResponsiveContainer
                 width='100%'
@@ -157,17 +158,19 @@ export default function AnalyticsOverview() {
                       borderRadius: '8px',
                       border: 'none',
                       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      fontSize: '14px',
                     }}
                   />
                   <Legend
                     verticalAlign='bottom'
                     height={36}
                     iconType='circle'
+                    wrapperStyle={{ fontSize: '14px' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className='h-full flex items-center justify-center text-gray-400 text-center px-4'>
+              <div className='h-full flex items-center justify-center text-gray-400 text-center px-4 text-sm'>
                 Waiting for the first clicks to generate device data.
               </div>
             )}
