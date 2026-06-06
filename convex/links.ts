@@ -46,7 +46,7 @@ export const createShortLink = mutation({
     }
 
     // 4. Database Insertion: Store the payload securely
-    const newLinkId = await ctx.db.insert('links', {
+    await ctx.db.insert('links', {
       userId: internalUserId, // This will be undefined for anonymous users
       longUrl: args.longUrl,
       shortCode: finalSlug,
