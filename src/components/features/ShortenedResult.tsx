@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy } from 'lucide-react'
+import { Copy, CheckCircle2 } from 'lucide-react'
 
 interface ShortenedResultProps {
   urlData: {
@@ -22,47 +22,50 @@ export default function ShortenedResult({ urlData }: ShortenedResultProps) {
   }
 
   return (
-    <div className='bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col justify-between h-full'>
-      <div>
+    <div className='bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5 flex flex-col justify-center h-full min-w-0'>
+      <div className='min-w-0'>
         <p
-          className='text-sm text-gray-500 truncate mb-1'
+          className='text-xs sm:text-sm text-gray-500 truncate mb-2'
           title={urlData.longUrl}
         >
           {urlData.longUrl}
         </p>
-        <div className='flex items-center justify-between mt-1'>
+
+        <div className='flex items-center justify-between gap-3 min-w-0'>
           <a
             href={`https://${urlData.shortUrl}`}
             target='_blank'
             rel='noopener noreferrer'
-            className='font-display text-xl font-semibold text-blue-600 hover:underline truncate mr-4'
+            className='font-display text-lg sm:text-xl font-semibold text-blue-600 hover:underline truncate min-w-0'
           >
             {urlData.shortUrl}
           </a>
-          <div className='relative'>
+
+          {/* Action Button: shrink-0 prevents the button from being crushed by long URLs */}
+          <div className='relative shrink-0'>
             <button
               onClick={handleCopy}
-              className='p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors group'
+              className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
+                isCopied
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+              }`}
               aria-label='Copy to clipboard'
             >
-              <Copy className='w-5 h-5' />
+              {isCopied ? (
+                <CheckCircle2 className='w-4 h-4 sm:w-5 sm:h-5' />
+              ) : (
+                <Copy className='w-4 h-4 sm:w-5 sm:h-5' />
+              )}
             </button>
+
             {isCopied && (
-              <div className='absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-2 py-1 rounded transition-opacity whitespace-nowrap z-10'>
+              <div className='absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs sm:text-sm px-2.5 py-1 rounded shadow-md transition-opacity whitespace-nowrap z-10'>
                 Copied!
               </div>
             )}
           </div>
         </div>
-      </div>
-      <div className='mt-4 pt-2 border-t border-gray-100 flex gap-2'>
-        <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200'>
-          <span className='w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5'></span>
-          Active
-        </span>
-        <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200'>
-          Clicks: 0
-        </span>
       </div>
     </div>
   )
