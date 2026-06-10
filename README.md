@@ -2,7 +2,7 @@
 
 **Scissor** is a high-performance, full-stack URL management platform designed to transform long, complex URLs into clean, branded links. The application provides instant redirects, secure user isolation, dynamic QR code generation, and granular click tracking via an interactive analytics dashboard.
 
-**Live Application:** [View Live Deployment](https://https://scissor-puce-seven.vercel.app)
+**Live Application:** [View Live Deployment](https://scissor-puce-seven.vercel.app)
 
 ---
 
